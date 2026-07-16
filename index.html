@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic Tortoise - AI Creative Studio</title>
+    <style>
+        :root {
+            --bg-color: #0d0d0d;
+            --card-bg: #151515;
+            --border-color: #222222;
+            --accent-red: #ff001e;
+            --accent-red-hover: #cc0018;
+            --text-white: #ffffff;
+            --muted-text: #888888;
+            --green-deposit: #2e7d32;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-white);
+            margin: 0;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-sizing: border-box;
+        }
+
+        /* Matches your exact top balance card styling */
+        .native-balance-card {
+            border: 1px solid var(--accent-red);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 24px;
+            background: rgba(255, 0, 30, 0.02);
+        }
+
+        .balance-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--muted-text);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .balance-amount {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-white);
+            font-family: sans-serif;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-white);
+            margin: 0 0 4px 0;
+            text-align: center;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--muted-text);
+            font-size: 13px;
+            margin: 0 0 24px 0;
+        }
+
+        /* Tab Navigation - Matches bottom navigation styling */
+        .tab-control {
+            display: flex;
+            background: #0d0d0d;
+            padding: 4px;
+            border-radius: 10px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--muted-text);
+            padding: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            margin-top: 0 !important;
+        }
+
+        .tab-btn.active {
+            background: #1e1e1e;
+            color: var(--accent-red);
+        }
+
+        .studio-panel {
+            display: none;
+        }
+
+        .studio-panel.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-red);
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            background: #0d0d0d;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            color: var(--text-white);
+            font-size: 14px;
+            resize: none;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-red);
+        }
+
+        /* Image reference upload section */
+        .file-upload-wrapper {
+            position: relative;
+            background: #0d0d0d;
+            border: 1px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .file-upload-wrapper:hover {
+            border-color: var(--accent-red);
+        }
+
+        .file-upload-wrapper input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .preview-img {
+            max-width: 100%;
+            max-height: 140px;
+            border-radius: 8px;
+            margin-top: 12px;
+            display: none;
+            border: 1px solid var(--border-color);
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            background: #0d0d0d;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            color: var(--text-white);
+            font-size: 13px;
+            outline: none;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent-red);
+        }
+
+        /* Primary Action Button styled exactly like your Deposit buttons */
+        .action-btn {
+            width: 100%;
+            background: var(--accent-red);
+            color: var(--text-white);
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 8px;
+        }
+
+        .action-btn:hover {
+            background: var(--accent-red-hover);
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+
+        .action-btn:disabled {
+            background: #1e1e1e;
+            color: #555555;
+            cursor: not-allowed;
+            border: 1px solid var(--border-color);
+        }
+
+        .result-container {
+            margin-top: 24px;
+            display: none;
+            text-align: center;
+        }
+
+        video, audio {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: #000000;
+        }
+
+        video {
+            max-height: 480px;
+        }
+
+        audio {
+            margin-top: 8px;
+        }
+
+        .loading-text {
+            color: var(--accent-red);
+            font-weight: 700;
+            margin: 20px 0;
+            display: none;
+            text-align: center;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Admin / Dev settings panel */
+        .admin-panel {
+            margin-top: 32px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .admin-header {
+            font-size: 10px;
+            color: var(--muted-text);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .badge-admin {
+            background: rgba(255, 0, 30, 0.1);
+            color: var(--accent-red);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 800;
+            display: none;
+            border: 1px solid rgba(255, 0, 30, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Active Cash Balance (Matches exact design layout) -->
+    <div class="native-balance-card">
+        <div class="balance-title">Current Balance</div>
+        <div class="balance-amount" id="balance-display">KES 0.00</div>
+    </div>
+
+    <h2>Creative Studio</h2>
+    <p class="subtitle">AI Video & Podcast Studio Hub</p>
+
+    <!-- Tab navigation -->
+    <div class="tab-control">
+        <button class="tab-btn active" onclick="switchTab('video')">🎬 Video Creator</button>
+        <button class="tab-btn" onclick="switchTab('podcast')">🎙️ Podcast Studio</button>
+    </div>
+
+    <!-- 1. VIDEO CREATOR PANEL -->
+    <div id="videoPanel" class="studio-panel active">
+        <div class="form-group">
+            <label for="prompt">Describe your scene / motion:</label>
+            <textarea id="prompt" placeholder="E.g., A slow motion shot of a majestic tortoise walking through neon-lit streets..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Starting Reference Image (Optional):</label>
+            <div class="file-upload-wrapper">
+                <span id="upload-placeholder" style="color: var(--muted-text); font-size: 13px;">📸 Select starting frame image</span>
+                <input type="file" id="imageInput" accept="image/*" onchange="previewFile()">
+                <img src="" id="preview" class="preview-img" alt="Preview">
+            </div>
+        </div>
+
+        <div class="form-group grid-2">
+            <div>
+                <label for="style">Art Style:</label>
+                <select id="style">
+                    <option value="Cinematic masterpiece, highly detailed, realistic, dramatic lighting">Cinematic Realism</option>
+                    <option value="3D Disney Pixar animation style, warm, expressive characters">3D Animation</option>
+                    <option value="2D anime studio style, hand-painted aesthetic, vibrant">Anime Studio</option>
+                    <option value="Gritty, dark comic book illustration, moody colors, ink style">Dark Comic Book</option>
+                    <option value="Futuristic sci-fi, cyberpunk neon aesthetic, highly detailed tech">Cyberpunk Tech</option>
+                </select>
+            </div>
+            <div>
+                <label for="ratio">Aspect Ratio:</label>
+                <select id="ratio">
+                    <option value="9:16">9:16 (TikTok/Shorts/Reels)</option>
+                    <option value="16:9">16:9 (YouTube Widescreen)</option>
+                    <option value="1:1">1:1 (Square Post)</option>
+                </select>
+            </div>
+        </div>
+
+        <button id="generateBtn" class="action-btn" onclick="requestGeneration('video', 120.00)">
+            Generate Video (KES 120.00)
+        </button>
+
+        <div class="loading-text" id="loader">Generating video file... Please wait 1-2 minutes</div>
+
+        <div class="result-container" id="resultBlock">
+            <label style="margin-bottom: 12px; display: block;">Your Output Video:</label>
+            <video id="videoPlayer" controls autoplay loop></video>
+        </div>
+    </div>
+
+    <!-- 2. PODCAST STUDIO PANEL -->
+    <div id="podcastPanel" class="studio-panel">
+        <div class="form-group">
+            <label for="podcastScript">Podcast Script:</label>
+            <textarea id="podcastScript" placeholder="Type up your podcast details or narration script here..."></textarea>
+        </div>
+
+        <button id="generatePodcastBtn" class="action-btn" onclick="requestGeneration('podcast', 60.00)">
+            Generate Podcast (KES 60.00)
+        </button>
+
+        <div class="loading-text" id="podcastLoader">Synthesizing audio... Please wait 30-60 seconds</div>
+
+        <div class="result-container" id="podcastResultBlock">
+            <label style="margin-bottom: 12px; display: block;">Your Output Audio:</label>
+            <audio id="audioPlayer" controls></audio>
+        </div>
+    </div>
+
+    <!-- DEV CONTROL OVERRIDE -->
+    <div class="admin-panel">
+        <div class="admin-header">
+            <span>Admin Overwrite Key</span>
+            <span id="adminBadge" class="badge-admin">Dev Mode Enabled</span>
+        </div>
+        <input type="text" id="adminPasscode" placeholder="Enter dev bypass passcode" oninput="checkAdminBadge()">
+    </div>
+</div>
+
+<script>
+    // Configured Render backend endpoint
+    const BACKEND_URL = "https://magic-videos.onrender.com"; 
+    let userCashBalance = 0.00;
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.studio-panel').forEach(panel => panel.classList.remove('active'));
+
+        if (tabName === 'video') {
+            document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+            document.getElementById('videoPanel').classList.add('active');
+        } else {
+            document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+            document.getElementById('podcastPanel').classList.add('active');
+        }
+    }
+
+    function previewFile() {
+        const preview = document.getElementById('preview');
+        const file = document.getElementById('imageInput').files[0];
+        const placeholder = document.getElementById('upload-placeholder');
+        const reader = new FileReader();
+
+        reader.addEventListener("load", function () {
+            preview.src = reader.result;
+            preview.style.display = "block";
+            placeholder.innerText = "Change Selected Image";
+        }, false);
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function checkAdminBadge() {
+        const adminBadge = document.getElementById('adminBadge');
+        const code = document.getElementById('adminPasscode').value.trim();
+        adminBadge.style.display = code ? "inline-block" : "none";
+    }
+
+    const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+
+    // Android WebView bridge callback for balance synchronization
+    function updateWebBalance(balance) {
+        userCashBalance = parseFloat(balance);
+        document.getElementById('balance-display').innerText = `KES ${userCashBalance.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    // Handles the request trigger
+    async function requestGeneration(type, cost) {
+        const adminCode = document.getElementById('adminPasscode').value.trim();
+
+        if (adminCode !== "") {
+            if (type === 'video') {
+                executeVideoGeneration();
+            } else {
+                executePodcastGeneration();
+            }
+            return;
+        }
+
+        if (userCashBalance < cost) {
+            alert(`Insufficient funds! This generation requires KES ${cost.toFixed(2)}. Please deposit cash to top up.`);
+            return;
+        }
+
+        if (typeof MagicTortoise !== "undefined" && MagicTortoise !== null) {
+            // Initiate balance deduction inside Android code
+            MagicTortoise.deductBalance(cost, type);
+        } else {
+            alert("App bridge context was not found. Please run this inside the Magic Tortoise Android app.");
+        }
+    }
+
+    // Android returns execution success or failure
+    function onDeductionComplete(success, newBalance, type) {
+        if (success) {
+            updateWebBalance(newBalance);
+            if (type === 'video') {
+                executeVideoGeneration();
+            } else {
+                executePodcastGeneration();
+            }
+        } else {
+            alert("Database transaction failed. Balance could not be verified or processed.");
+        }
+    }
+
+    async function executeVideoGeneration() {
+        const promptInput = document.getElementById('prompt').value.trim();
+        const styleSelect = document.getElementById('style').value;
+        const ratioSelect = document.getElementById('ratio').value;
+        const fileInput = document.getElementById('imageInput');
+        const adminCode = document.getElementById('adminPasscode').value.trim();
+        
+        const generateBtn = document.getElementById('generateBtn');
+        const loader = document.getElementById('loader');
+        const resultBlock = document.getElementById('resultBlock');
+        const videoPlayer = document.getElementById('videoPlayer');
+
+        if (!promptInput) {
+            alert('Please specify what you want your video scene to display!');
+            return;
+        }
+
+        const fullPrompt = `${promptInput}. Visual art style: ${styleSelect}. Fluid cinematic motion, high definition.`;
+
+        generateBtn.disabled = true;
+        loader.style.display = 'block';
+        resultBlock.style.display = 'none';
+
+        let base64Image = null;
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            base64Image = await toBase64(file);
+        }
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/generate-video`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-admin-bypass': adminCode 
+                },
+                body: JSON.stringify({ 
+                    prompt: fullPrompt,
+                    aspectRatio: ratioSelect,
+                    image: base64Image
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.videoUrl) {
+                videoPlayer.src = data.videoUrl;
+                resultBlock.style.display = 'block';
+            } else {
+                alert('Generation failed: ' + (data.error || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error(error);
+            alert(`Unable to make a connection with the generation engine.`);
+        } finally {
+            generateBtn.disabled = false;
+            loader.style.display = 'none';
+        }
+    }
+
+    async function executePodcastGeneration() {
+        const scriptInput = document.getElementById('podcastScript').value.trim();
+        const adminCode = document.getElementById('adminPasscode').value.trim();
+
+        const generateBtn = document.getElementById('generatePodcastBtn');
+        const loader = document.getElementById('podcastLoader');
+        const resultBlock = document.getElementById('podcastResultBlock');
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        if (!scriptInput) {
+            alert('Please compose your voice script first!');
+            return;
+        }
+
+        generateBtn.disabled = true;
+        loader.style.display = 'block';
+        resultBlock.style.display = 'none';
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/generate-podcast`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-admin-bypass': adminCode 
+                },
+                body: JSON.stringify({ script: scriptInput })
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.audioUrl) {
+                audioPlayer.src = data.audioUrl;
+                resultBlock.style.display = 'block';
+            } else {
+                alert('Podcast audio generation failed: ' + (data.error || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error(error);
+            alert(`Connection error with backend render engine.`);
+        } finally {
+            generateBtn.disabled = false;
+            loader.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
