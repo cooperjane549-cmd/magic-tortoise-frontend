@@ -38,12 +38,16 @@
             box-sizing: border-box;
         }
 
+        /* Set to user-select: none to prevent native copy-paste UI during long-press */
         h2 {
             font-size: 20px;
             font-weight: 700;
             color: var(--text-white);
             margin: 0 0 4px 0;
             text-align: center;
+            user-select: none;
+            -webkit-user-select: none;
+            cursor: pointer;
         }
 
         p.subtitle {
@@ -51,6 +55,8 @@
             color: var(--muted-text);
             font-size: 13px;
             margin: 0 0 24px 0;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         /* Tab Navigation - Matches bottom navigation styling */
@@ -248,11 +254,12 @@
             letter-spacing: 1px;
         }
 
-        /* Admin / Dev settings panel */
+        /* Completely Hidden Admin / Dev settings panel by default */
         .admin-panel {
             margin-top: 32px;
             padding-top: 20px;
             border-top: 1px dashed var(--border-color);
+            display: none; /* Silently hidden */
         }
 
         .admin-header {
@@ -281,7 +288,8 @@
 <body>
 
 <div class="container">
-    <h2>Creative Studio</h2>
+    <!-- Stealth secret long-press target on the <h2> tag -->
+    <h2 id="secretHeader">Creative Studio</h2>
     <p class="subtitle">AI Video & Podcast Studio Hub</p>
 
     <!-- Tab navigation -->
@@ -358,8 +366,8 @@
         </div>
     </div>
 
-    <!-- DEV CONTROL OVERRIDE -->
-    <div class="admin-panel">
+    <!-- DEV CONTROL OVERRIDE (Hidden by default, shown via 3s hold) -->
+    <div class="admin-panel" id="adminControlPanel">
         <div class="admin-header">
             <span>Admin Overwrite Key</span>
             <span id="adminBadge" class="badge-admin">Dev Mode Enabled</span>
@@ -370,8 +378,43 @@
 
 <script>
     const BACKEND_URL = "https://magic-videos.onrender.com"; 
-    let userCashBalance = 0.00; // Keeps track of balance in background memory
+    let userCashBalance = 0.00; // Monitored silently in memory
 
+    // ==========================================
+    // STEALTH ADMIN PANEL UNLOCK GESTURE
+    // ==========================================
+    const secretHeader = document.getElementById('secretHeader');
+    const adminControlPanel = document.getElementById('adminControlPanel');
+    let pressTimer;
+
+    function startPress() {
+        // Start counting for 3 seconds (3000ms)
+        pressTimer = setTimeout(() => {
+            if (adminControlPanel.style.display === 'block') {
+                adminControlPanel.style.display = 'none'; // Toggle off
+                alert("Developer panel hidden.");
+            } else {
+                adminControlPanel.style.display = 'block'; // Toggle on
+                alert("Developer mode unlocked!");
+            }
+        }, 3000); 
+    }
+
+    function endPress() {
+        clearTimeout(pressTimer);
+    }
+
+    // Touch events for mobile WebView
+    secretHeader.addEventListener('touchstart', startPress);
+    secretHeader.addEventListener('touchend', endPress);
+    // Mouse fallback events for web browser testing
+    secretHeader.addEventListener('mousedown', startPress);
+    secretHeader.addEventListener('mouseup', endPress);
+    secretHeader.addEventListener('mouseleave', endPress);
+
+    // ==========================================
+    // DASHBOARD ACTIONS & LOGIC
+    // ==========================================
     function switchTab(tabName) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.studio-panel').forEach(panel => panel.classList.remove('active'));
@@ -402,7 +445,6 @@
         }
     }
 
-    // Handles the admin bypass visual indicator
     function checkAdminBadge() {
         const adminBadge = document.getElementById('adminBadge');
         const code = document.getElementById('adminPasscode').value.trim();
@@ -447,7 +489,7 @@
         }
     }
 
-    // Receives transaction callback from Android
+    // Android returns execution success or failure
     function onDeductionComplete(success, newBalance, type) {
         if (success) {
             updateWebBalance(newBalance);
