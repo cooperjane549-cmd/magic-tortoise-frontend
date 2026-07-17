@@ -13,7 +13,6 @@
             --accent-red-hover: #cc0018;
             --text-white: #ffffff;
             --muted-text: #888888;
-            --green-deposit: #2e7d32;
         }
 
         body {
@@ -37,32 +36,6 @@
             border-radius: 16px;
             border: 1px solid var(--border-color);
             box-sizing: border-box;
-        }
-
-        /* Matches your exact top balance card styling */
-        .native-balance-card {
-            border: 1px solid var(--accent-red);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 24px;
-            background: rgba(255, 0, 30, 0.02);
-        }
-
-        .balance-title {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--muted-text);
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .balance-amount {
-            font-size: 32px;
-            font-weight: 800;
-            color: var(--text-white);
-            font-family: sans-serif;
         }
 
         h2 {
@@ -308,12 +281,6 @@
 <body>
 
 <div class="container">
-    <!-- Active Cash Balance (Matches exact design layout) -->
-    <div class="native-balance-card">
-        <div class="balance-title">Current Balance</div>
-        <div class="balance-amount" id="balance-display">KES 0.00</div>
-    </div>
-
     <h2>Creative Studio</h2>
     <p class="subtitle">AI Video & Podcast Studio Hub</p>
 
@@ -402,9 +369,8 @@
 </div>
 
 <script>
-    // Configured Render backend endpoint
     const BACKEND_URL = "https://magic-videos.onrender.com"; 
-    let userCashBalance = 0.00;
+    let userCashBalance = 0.00; // Keeps track of balance in background memory
 
     function switchTab(tabName) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -436,6 +402,7 @@
         }
     }
 
+    // Handles the admin bypass visual indicator
     function checkAdminBadge() {
         const adminBadge = document.getElementById('adminBadge');
         const code = document.getElementById('adminPasscode').value.trim();
@@ -449,13 +416,12 @@
         reader.onerror = error => reject(error);
     });
 
-    // Android WebView bridge callback for balance synchronization
+    // Native app calls this directly to sync the cash balance value in background memory
     function updateWebBalance(balance) {
         userCashBalance = parseFloat(balance);
-        document.getElementById('balance-display').innerText = `KES ${userCashBalance.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
 
-    // Handles the request trigger
+    // Verifies the user has enough money silently and starts execution
     async function requestGeneration(type, cost) {
         const adminCode = document.getElementById('adminPasscode').value.trim();
 
@@ -474,14 +440,14 @@
         }
 
         if (typeof MagicTortoise !== "undefined" && MagicTortoise !== null) {
-            // Initiate balance deduction inside Android code
+            // Trigger actual deduction in the native app
             MagicTortoise.deductBalance(cost, type);
         } else {
             alert("App bridge context was not found. Please run this inside the Magic Tortoise Android app.");
         }
     }
 
-    // Android returns execution success or failure
+    // Receives transaction callback from Android
     function onDeductionComplete(success, newBalance, type) {
         if (success) {
             updateWebBalance(newBalance);
